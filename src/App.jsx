@@ -2,8 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import pattern from "/src/assets/pattern.svg";
+import carRed from "/src/assets/Mean.png";
+import carGreen from "/src/assets/Cho.png";
+import carBlue from "/src/assets/Faii.png";
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, Cell } from "recharts";
+
 
 
 export default function App() {
@@ -291,7 +295,31 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+const CarLabel = ({ x, y, width, payload }) => {
+  if (!payload || !payload.name) return null;
 
+  const carMap = {
+    Meen: carRed,
+    Cho: carGreen,
+    Faii: carBlue,
+  };
+
+  const car = carMap[payload.name];
+  if (!car) return null;
+
+  return (
+    <image
+      href={car}
+      x={x + width / 2 - 18}
+      y={y - 42}
+      width={36}
+      height={36}
+      style={{
+        filter: "drop-shadow(0 0 6px rgba(255,255,255,0.6))",
+      }}
+    />
+  );
+};
 
   return (
     <div className="min-h-screen bg-gray-950 text-white ">
@@ -327,7 +355,7 @@ useEffect(() => {
 
         <div className="w-full h-180">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} >
+            <BarChart data={chartData} barCategoryGap={30}>
               <defs>
                 <linearGradient id="speed" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
@@ -337,7 +365,7 @@ useEffect(() => {
               </defs>
               <Tooltip />
 
-              <Bar dataKey="score">
+              <Bar dataKey="score" barSize={40}>
                 {chartData.map((entry, index) => (
                   <Cell
                     key={index}
@@ -354,6 +382,15 @@ useEffect(() => {
                   className="fill-white text-sm font-bold"
                 />
               </Bar>
+              {/* <Bar dataKey="score" barSize={36} label={<CarLabel />}>
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={index}
+                  fill={entry.color}
+                  style={{ animation: "speedMove 1.2s linear infinite" }}
+                />
+              ))}
+            </Bar> */}
             </BarChart>
           </ResponsiveContainer>
         </div>
