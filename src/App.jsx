@@ -45,20 +45,33 @@ useEffect(() => {
   const handleInput = (field, value) =>
     setRoundResult((r) => ({ ...r, [field]: value }));
 
+  const isBonusTime = () => {
+  const now = new Date();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+
+  const start = 16 * 60 + 20; // 16:20
+  const end = 16 * 60 + 30;   // 16:30
+
+  return minutes >= start && minutes <= end;
+};
+
   const handleSubmit = () => {
   if (!roundResult.first || !roundResult.second || !roundResult.third) return;
 
   const newScores = { ...scores };
-  newScores[roundResult.first] += 2;
-  newScores[roundResult.second] += 1;
+  const bonus = isBonusTime() ? 2 : 0;
+
+  newScores[roundResult.first] += 2 * bonus;
+  newScores[roundResult.second] += 1 * bonus;
 
   // บันทึกลง history
   const newRound = {
-    time: new Date().toLocaleString(),
-    first: roundResult.first,
-    second: roundResult.second,
-    third: roundResult.third,
-  };
+  time: new Date().toLocaleString(),
+  first: roundResult.first,
+  second: roundResult.second,
+  third: roundResult.third,
+  bonus: isBonusTime(),
+};
 
   setHistory((h) => [...h, newRound]);
   setScores(newScores);
@@ -165,7 +178,13 @@ const winRate = (player) => {
   return Math.round((wins / totalRounds) * 100);
 };
 
-function WinRateCircle({ percent, color }) {
+const bestWinRate = Math.max(...players.map((p) => winRate(p)));
+
+const isTopWinner = (player) => {
+  return winRate(player) === bestWinRate && bestWinRate > 0;
+};
+
+function WinRateCircle({ percent, color, glow }) {
   const radius = 34;
   const stroke = 6;
   const normalizedRadius = radius - stroke * 2;
@@ -174,16 +193,44 @@ function WinRateCircle({ percent, color }) {
     circumference - (percent / 100) * circumference;
 
   return (
-    <svg height={radius * 2} width={radius * 2}>
+    <motion.svg
+      height={radius * 2}
+      width={radius * 2}
+      animate={
+        glow
+          ? { scale: [1, 1.08, 1] }
+          : { scale: 1 }
+      }
+      transition={
+        glow
+          ? { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+          : {}
+      }
+    >
       {/* Background */}
       <circle
-        stroke="rgba(0, 0, 0, 0.58)"
+        stroke="rgba(255,255,255,0.1)"
         fill="transparent"
         strokeWidth={stroke}
         r={normalizedRadius}
         cx={radius}
         cy={radius}
       />
+
+      {/* Glow layer */}
+      {glow && (
+        <circle
+          stroke={color}
+          fill="transparent"
+          strokeWidth={stroke + 4}
+          r={normalizedRadius}
+          cx={radius}
+          cy={radius}
+          opacity={0.35}
+          filter="blur(6px)"
+        />
+      )}
+
       {/* Progress */}
       <motion.circle
         stroke={color}
@@ -199,6 +246,7 @@ function WinRateCircle({ percent, color }) {
         animate={{ strokeDashoffset }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       />
+
       {/* Text */}
       <text
         x="50%"
@@ -211,12 +259,67 @@ function WinRateCircle({ percent, color }) {
       >
         {percent}%
       </text>
-    </svg>
+    </motion.svg>
   );
 }
 
+const [bonusAlert, setBonusAlert] = useState(false);
+
+useEffect(() => {
+  const checkBonusTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    // เข้า 16:20 พอดี
+    if (hours === 16 && minutes === 20) {
+      const alerted = localStorage.getItem("bonusAlerted");
+
+      if (!alerted) {
+        setBonusAlert(true);
+        localStorage.setItem("bonusAlerted", "true");
+      }
+    }
+
+    // รีเซ็ตวันถัดไป
+    if (hours === 0 && minutes === 0) {
+      localStorage.removeItem("bonusAlerted");
+    }
+  };
+
+  const interval = setInterval(checkBonusTime, 30 * 1000);
+  return () => clearInterval(interval);
+}, []);
+
+
+
   return (
     <div className="min-h-screen bg-gray-950 text-white ">
+
+      {bonusAlert && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center"
+        >
+          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-6 rounded-2xl shadow-2xl text-center max-w-sm">
+            <h2 className="text-2xl font-extrabold mb-2 text-black">
+              ⚡ BONUS TIME!
+            </h2>
+            <p className="text-black font-semibold mb-4">
+              เวลา 16:20 – 16:30<br />
+              คะแนนที่ได้ +2
+            </p>
+
+            <button
+              onClick={() => setBonusAlert(false)}
+              className="bg-black text-white px-4 py-2 rounded-xl font-bold hover:scale-105 transition"
+            >
+              เข้าใจแล้ว
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       <div className="">
         {/* SCORE GRAPH */}
@@ -283,15 +386,16 @@ function WinRateCircle({ percent, color }) {
 
 <div className="flex justify-center">
   <WinRateCircle
-    percent={winRate(p)}
-    color={
-      p === "Meen"
-        ? "#ef4444"
-        : p === "Cho"
-        ? "#22c55e"
-        : "#3b82f6"
-    }
-  />
+  percent={winRate(p)}
+  color={
+    p === "Meen"
+      ? "#ef4444"
+      : p === "Cho"
+      ? "#22c55e"
+      : "#3b82f6"
+  }
+  glow={isTopWinner(p)}
+/>
 </div>
 
 <p className="text-xs mt-1 opacity-70">อัตราชนะ</p>
@@ -411,7 +515,7 @@ function WinRateCircle({ percent, color }) {
     {history.length === 0 ? (
       <div className="text-gray-400 text-sm mt-3">ยังไม่มีประวัติ</div>
     ) : (
-      <div className="space-y-3 overflow-y-auto max-h-[90vh] pr-2 custom-scrollbar transition-all duration-300">
+      <div className="space-y-3 overflow-y-auto max-h-[90vh] pr-2 transition-all duration-300 custom-scrollbar">
         {history
           .slice()
           .reverse()
@@ -420,12 +524,17 @@ function WinRateCircle({ percent, color }) {
               <div className="relative p-3 text-sm hover:shadow-lg bg-white/5 rounded-xl border border-l-5  border-l-red-500 border-white/10 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-15 h-15 bg-red-500/10 rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
                 <img className="absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500" src={pattern} alt="pattern" />
-              <div className="text-gray-300 text-xs mb-1">{r.time}</div>
-              <div className="flex justify-center my-3">
-                <div className="py-2 px-3 font-medium text-gray-900 border-1 border-red-300 rounded-l-2xl bg-white">🥇 {r.first}</div>
-                <div className="py-2 px-3 font-medium text-gray-900 border-1 border-red-300 bg-white">🥇 {r.second}</div>
-                <div className="py-2 px-3 font-medium text-gray-900 border-1 border-red-300 rounded-r-2xl bg-white">🥉 {r.third}</div>
+              <div className="text-gray-300 text-xs mb-3">{r.time}</div>
+              <div className="flex justify-center">
+                <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 rounded-l-2xl bg-white">🥇 {r.first}</div>
+                <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 bg-white">🥇 {r.second}</div>
+                <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 rounded-r-2xl bg-white">🥉 {r.third}</div>
               </div>
+              {r.bonus && (
+                <div className="text-xs text-yellow-400 font-bold text-center mt-2">
+                  ⚡ PEAK TIME ZONE // BONUS TIME x 2
+                </div>
+              )}
               
 
               {/* <div className="flex gap-2 mt-2">
