@@ -157,6 +157,63 @@ const chartData = players.map((p) => ({
       : "#3b82f6",
 }));
 
+const totalRounds = history.length;
+
+const winRate = (player) => {
+  if (totalRounds === 0) return 0;
+  const wins = history.filter((h) => h.first === player).length;
+  return Math.round((wins / totalRounds) * 100);
+};
+
+function WinRateCircle({ percent, color }) {
+  const radius = 34;
+  const stroke = 6;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset =
+    circumference - (percent / 100) * circumference;
+
+  return (
+    <svg height={radius * 2} width={radius * 2}>
+      {/* Background */}
+      <circle
+        stroke="rgba(0, 0, 0, 0.58)"
+        fill="transparent"
+        strokeWidth={stroke}
+        r={normalizedRadius}
+        cx={radius}
+        cy={radius}
+      />
+      {/* Progress */}
+      <motion.circle
+        stroke={color}
+        fill="transparent"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray={`${circumference} ${circumference}`}
+        strokeDashoffset={strokeDashoffset}
+        r={normalizedRadius}
+        cx={radius}
+        cy={radius}
+        initial={{ strokeDashoffset: circumference }}
+        animate={{ strokeDashoffset }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+      {/* Text */}
+      <text
+        x="50%"
+        y="50%"
+        dominantBaseline="middle"
+        textAnchor="middle"
+        fill="white"
+        fontSize="12"
+        fontWeight="bold"
+      >
+        {percent}%
+      </text>
+    </svg>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-950 text-white ">
@@ -214,9 +271,31 @@ const chartData = players.map((p) => ({
               : 'bg-gradient-to-br from-blue-800 to-blue-500'}`}>
             <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
               <h2 className="text-md font-semibold">{p}</h2>
-              <motion.p key={scores[p]} initial={{ scale: 1 }} animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 0.4 }} className="text-3xl font-bold">
+              <motion.p
+                key={scores[p]}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.4, 1] }}
+                transition={{ duration: 0.4 }}
+                className="text-3xl font-bold mb-2"
+              >
                 {scores[p]}
               </motion.p>
+
+<div className="flex justify-center">
+  <WinRateCircle
+    percent={winRate(p)}
+    color={
+      p === "Meen"
+        ? "#ef4444"
+        : p === "Cho"
+        ? "#22c55e"
+        : "#3b82f6"
+    }
+  />
+</div>
+
+<p className="text-xs mt-1 opacity-70">อัตราชนะ</p>
+              
             </div>
           </div>
         ))}
@@ -332,12 +411,12 @@ const chartData = players.map((p) => ({
     {history.length === 0 ? (
       <div className="text-gray-400 text-sm mt-3">ยังไม่มีประวัติ</div>
     ) : (
-      <div className="space-y-3 overflow-y-auto max-h-[90vh] pr-2">
+      <div className="space-y-3 overflow-y-auto max-h-[90vh] pr-2 custom-scrollbar transition-all duration-300">
         {history
           .slice()
           .reverse()
           .map((r, i) => (
-            <div key={i} className="block group p-2 overflow-hidden">
+            <div key={i} className="block group p-2 overflow-hidden ">
               <div className="relative p-3 text-sm hover:shadow-lg bg-white/5 rounded-xl border border-l-5  border-l-red-500 border-white/10 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-15 h-15 bg-red-500/10 rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
                 <img className="absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500" src={pattern} alt="pattern" />
