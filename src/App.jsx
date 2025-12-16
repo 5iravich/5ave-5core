@@ -503,7 +503,7 @@ export default function App() {
       ))}
       </select>
 
-      <button className="relative w-full z-10 text-xs bg-green-600 hover:bg-green-700 p-3 rounded-xl font-bold"
+      <button className="relative w-full z-10 text-xs bg-blue-600 hover:bg-blue-700 p-3 rounded-xl font-bold"
       onClick={handleSubmit}>บันทึกคะแนน</button>
         <div className="flex">
           <i className="fi fi-rr-info text-sky-600 font-bold mr-2"></i>
