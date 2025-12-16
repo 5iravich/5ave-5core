@@ -275,7 +275,7 @@ export default function App() {
       const minutes = now.getMinutes();
 
       // เข้า 16:20 พอดี
-      if (hours === 16 && minutes === 20) {
+      if (hours === 16 && minutes === 15) {
         const alerted = localStorage.getItem("bonusAlerted");
 
         if (!alerted) {
