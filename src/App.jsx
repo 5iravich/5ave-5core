@@ -308,17 +308,52 @@ export default function App() {
 
   return (
     <image
-      href={car}
-      x={x + width / 2 - 18}   // กึ่งกลางแท่ง
-      y={y - 40}               // ลอยเหนือแท่ง
+      xlinkHref={car}
+      x={x + width / 2 - 18}
+      y={y - 40}
       width={36}
       height={36}
       style={{
-        filter: "drop-shadow(0 0 6px rgba(255,255,255,0.6))",
+        pointerEvents: "none",
+        filter: "drop-shadow(0 0 6px rgba(255,255,255,0.7))",
       }}
     />
   );
 };
+
+
+
+const getWinStreaks = () => {
+  const streaks = {};
+  players.forEach(p => (streaks[p] = 0));
+
+  let currentWinner = null;
+  let currentStreak = 0;
+
+  history.forEach((round) => {
+    if (round.first === currentWinner) {
+      currentStreak++;
+    } else {
+      currentWinner = round.first;
+      currentStreak = 1;
+    }
+
+    streaks[currentWinner] = Math.max(
+      streaks[currentWinner],
+      currentStreak
+    );
+  });
+
+  return streaks;
+};
+
+const winStreaks = getWinStreaks();
+
+const bestStreak = Math.max(...Object.values(winStreaks));
+const streakLeader = players.filter(
+  (p) => winStreaks[p] === bestStreak && bestStreak > 0
+);
+
 
 
   return (
@@ -350,20 +385,11 @@ export default function App() {
         <div className="flex-1 w-full max-w-4xl mx-auto bg-gray-900 p-4">
           <div className="text-center text-xs text-gray-400">
           </div>
-          <div className="w-full h-220">
+          <div className="w-full h-[850px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} barCategoryGap={30} margin={{ top: 60, right: 20, left: 20, bottom: 20 }}>
               <XAxis dataKey="name" hide />
-                <Bar dataKey="score" barSize={40}>
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={index}
-                      fill={entry.color}
-                      style={{
-                        animation: "speedMove 1.2s linear infinite",
-                      }}
-                    />
-                  ))}
+                <Bar dataKey="score" barSize={40} overflow="visible">
                   {/* แสดงตัวเลขบนหัวแท่ง */}
                   {/* <LabelList
                     dataKey="score"
@@ -386,6 +412,7 @@ export default function App() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            
           </div>
           <div className="mt-6 text-center text-xs text-gray-400">
             พัฒนาโดยคุณ 5iravich และสร้างสรรค์โดย Mindy — ข้อมูลเก็บในเครื่อง (localStorage) • Export/Import เป็นไฟล์ Excel (Scores + History)
@@ -418,6 +445,7 @@ export default function App() {
                 {scores[p]}
               </motion.p>
 
+              <p className="text-xs mt-1 opacity-70">อัตราชนะ</p>
               <div className="flex justify-center">
                 <WinRateCircle
                 percent={winRate(p)}
@@ -431,9 +459,11 @@ export default function App() {
                 glow={isTopWinner(p)}
               />
               </div>
-
-<p className="text-xs mt-1 opacity-70">อัตราชนะ</p>
-              
+              {winStreaks[p] > 1 && (
+                <p className="text-xs mt-1 text-yellow-400 font-semibold transition-all duration-300">
+                  🔥 ชนะติด {winStreaks[p]} รอบ
+                </p>
+              )}
             </div>
           </div>
         ))}
@@ -443,7 +473,7 @@ export default function App() {
 
           {/* ปุ่มอัปโหลด */}
           <label className="bg-blue-700/20 hover:bg-blue-700/40 p-1 rounded-lg text-blue-700 text-xs font-bold text-center cursor-pointer hover:scale-[1.02] transition-all duration-300 overflow-hidden">
-            <i class="fi fi-rr-add "></i> อัปโหลด
+            <i className="fi fi-rr-add "></i> อัปโหลด
             <input
               type="file"
               accept=".xlsx, .xls"
@@ -457,14 +487,14 @@ export default function App() {
             className=" bg-green-500/20 hover:bg-green-500/40 p-1 rounded-lg text-green-500 text-xs font-bold hover:scale-[1.02] transition-all duration-300 overflow-hidden"
             onClick={downloadExcel}
           >
-            <i class="fi fi-rr-download"></i> ดาวน์โหลด
+            <i className="fi fi-rr-download"></i> ดาวน์โหลด
           </button>
 
           <button
             className=" bg-red-500/20 hover:bg-red-500/40 p-1 rounded-lg text-red-500 text-xs font-bold hover:scale-[1.02] transition-all duration-300 overflow-hidden"
             onClick={clearScores}
           >
-            <i class="fi fi-rr-trash"></i>ล้างคะแนน
+            <i className="fi fi-rr-trash"></i>ล้างคะแนน
           </button>
 
         </div>
@@ -525,8 +555,7 @@ export default function App() {
 >
 
   {/* Toggle button */}
-  <button
-    onClick={() => setShowHistory((s) => !s)}
+  <button onClick={() => setShowHistory((s) => !s)}
     className="w-full p-2 px-5 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center mb-4 transition"
   >
     {showHistory ? (
@@ -543,7 +572,8 @@ export default function App() {
     transition={{ duration: 0.2 }}
     style={{ pointerEvents: showHistory ? "auto" : "none" }}
   >
-    <h2 className="text-lg font-semibold mb-3">ประวัติการแข่งขัน</h2>
+    <h2 className="text-lg font-semibold mb-3">ประวัติการแข่งขัน <a className="ml-2 text-xs">( ทั้งหมด {totalRounds} รอบ )</a> </h2>
+    
 
     {history.length === 0 ? (
       <div className="text-gray-400 text-sm mt-3">ยังไม่มีประวัติ</div>
