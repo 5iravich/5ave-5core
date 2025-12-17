@@ -368,7 +368,11 @@ const streakLeader = players.filter(
   (p) => winStreaks[p] === bestStreak && bestStreak > 0
 );
 
-
+const leftOffsetMap = {
+  Meen: -3.33,   // %
+  Cho: -3.33,
+  Faii: -3.33,
+};
 
   return (
     <div className="min-h-screen bg-gray-950 text-white ">
@@ -424,7 +428,7 @@ const streakLeader = players.filter(
               const heightRatio = d.score / maxScore;
 
               const leftPercent = ((index + 0.333) / chartData.length) * 100-3;
-              const bottomPercent = heightRatio * 85; // ความสูงแท่ง
+              const bottomPercent = heightRatio; // ความสูงแท่ง
 
               const carMap = {
                 Meen: carRed,
@@ -437,9 +441,11 @@ const streakLeader = players.filter(
                   key={d.name}
                   src={carMap[d.name]}
                   className="absolute w-[200px] h-[130px] pointer-events-none list-none"
-                  style={{
-                    left: `${leftPercent}%`,
+                  animate={{
+                    left: `${leftPercent + (leftOffsetMap[d.name] ?? 0)}%`,
                     bottom: `${bottomPercent}%`,
+                  }}
+                  style={{
                     transform: "translateX(-72%)", 
                     rotate: 90,
                     listStyle: "none",      // 👈 กัน bullet
