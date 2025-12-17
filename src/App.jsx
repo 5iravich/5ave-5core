@@ -5,6 +5,7 @@ import pattern from "/src/assets/pattern.svg";
 import carRed from "/src/assets/Meen.png";
 import carGreen from "/src/assets/Cho.png";
 import carBlue from "/src/assets/Faii.png";
+import circuit from "/src/assets/Japan_Circuit.avif"
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, Cell } from "recharts";
 
@@ -401,10 +402,24 @@ const leftOffsetMap = {
       
       {/* ******************* SCORE GRAPH ******************* */}
         <div className="flex-1 w-full max-w-4xl mx-auto bg-gray-900 p-4">
-          <div className="text-center text-xs text-gray-400">
-          </div>
           <div className="relative w-full h-[850px]">
-            <div className="bg-white w-full h-[30px]"></div>
+            {/* 🏁 FINISH LINE */}
+              <div className="absolute left-0 w-full z-20 pointer-events-none">
+                <div className="relative h-[24px]">
+                  {/* เส้น */}
+                  <div className="absolute top-1/2 left-0 w-full h-[10px] bg-gradient-to-r from-white/20 via-white to-white/20" />
+
+                  {/* ธงซ้าย */}
+                  <div className="absolute -left-2 top-1/2 -translate-y-1/2 text-4xl">
+                    🏁
+                  </div>
+
+                  {/* ธงขวา */}
+                  <div className="absolute -right-9 top-1/2 -translate-y-1/2 text-4xl">
+                    🏁
+                  </div>
+                </div>
+              </div>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
@@ -464,7 +479,11 @@ const leftOffsetMap = {
         {/* ******************* *************** ******************* */}
 
       </div>
+        <div className="absolute top-6 right-4">
+          <img src={circuit} alt="circuit" className="w-[400px]"/>
+        </div>
       <div className="absolute bottom-4 right-4 items-center p-6">
+        
       <div>
         {bonusRemain > 0 && (
           <div className="flex justify-center mb-2">
