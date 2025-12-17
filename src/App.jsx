@@ -400,6 +400,7 @@ const streakLeader = players.filter(
           <div className="text-center text-xs text-gray-400">
           </div>
           <div className="relative w-full h-[850px]">
+            <div className="bg-white w-full h-[30px]"></div>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
@@ -422,7 +423,7 @@ const streakLeader = players.filter(
               const maxScore = Math.max(...chartData.map(x => x.score), 1);
               const heightRatio = d.score / maxScore;
 
-              const leftPercent = ((index + 0.5) / chartData.length) * 100-3;
+              const leftPercent = ((index + 0.333) / chartData.length) * 100-3;
               const bottomPercent = heightRatio * 85; // ความสูงแท่ง
 
               const carMap = {
@@ -435,12 +436,14 @@ const streakLeader = players.filter(
                 <motion.img
                   key={d.name}
                   src={carMap[d.name]}
-                  className="absolute w-[120px] h-[85px] pointer-events-none block list-none"
+                  className="absolute w-[200px] h-[130px] pointer-events-none list-none"
                   style={{
                     left: `${leftPercent}%`,
                     bottom: `${bottomPercent}%`,
                     transform: "translateX(-72%)", 
                     rotate: 90,
+                    listStyle: "none",      // 👈 กัน bullet
+                    display: "block", 
                   }}
                 />
               );
