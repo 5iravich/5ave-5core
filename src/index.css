@@ -73,3 +73,22 @@ h1 {
     #fb923c
   );
 }
+
+@keyframes shineUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+}
+
+.shine-bar {
+  animation: shineUp 2.5s linear infinite;
+}
+

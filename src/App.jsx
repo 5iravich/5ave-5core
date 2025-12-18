@@ -423,7 +423,48 @@ const getTrendIcon = (player) => {
   return "➖";
 };
 
+function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
+  const colorMap = {
+    Meen: "from-red-700 to-red-500",
+    Cho: "from-green-700 to-green-500",
+    Faii: "from-blue-700 to-blue-500",
+  };
 
+  return (
+    <div>
+      <div className="text-xs font-bold mb-1 text-gray-800">{label}</div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {players.map((p) => {
+          const disabled = disabledPlayers.includes(p);
+          const selected = value === p;
+
+          return (
+            <button
+              key={p}
+              disabled={disabled}
+              onClick={() => onChange(p)}
+              className={`
+                relative p-1 rounded-xl text-xs font-bold transition-all duration-300
+                ${selected
+                  ? `bg-gradient-to-br ${colorMap[p]} scale-105 shadow-lg`
+                  : `bg-gray-500 hover:bg-gray-500/50 hover:scale-110`}
+                ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+              `}
+            >
+              {selected && (
+                <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full">
+                  ✓
+                </span>
+              )}
+              {p}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
       <img src={loop} alt="loop" className="min-h-screen scale-150 opacity-3 " />
@@ -657,46 +698,40 @@ const getTrendIcon = (player) => {
       <div className="block group  w-full max-w-xs ">
         <div className="relative p-6 rounded-2xl shadow-xl space-y-4 bg-white hover:shadow-lg hover:scale-[1.02] transition-all duration-300 overflow-hidden">
         <div className="absolute top-0 right-0 w-24 h-24 bg-gray-300 rounded-full -mr-12 -mt-12 -z-10 group-hover:scale-150 transition-transform duration-500"></div>
-      <h2 className="text-gray-900 text-md font-bold mb-4 text-center">ผลการแข่งขันรอบนี้</h2>
+      <h2 className="text-gray-900 text-md font-bold mb-3 text-center">ผลการแข่งขันรอบนี้</h2>
 
+      <CustomSelect
+        label="🥇 ผู้ชนะ (2 คะแนน)"
+        value={roundResult.first}
+        onChange={(v) => handleInput("first", v)}
+        players={players}
+        disabledPlayers={[roundResult.second, roundResult.third].filter(Boolean)}
+      />
 
-      <select className="w-full text-sm p-2 text-gray-900 bg-gray-400 rounded-xl"
-      value={roundResult.first} onChange={(e) => handleInput("first", e.target.value)}>
-      <option value="">เลือกผู้ชนะ (2 คะแนน)</option>
-      {players.map((p) => (
-      <option key={p} value={p} disabled={p === roundResult.second || p === roundResult.third }> {p} </option>
-      ))}
-      </select>
+      <CustomSelect
+        label="🥈 อันดับ 2 (1 คะแนน)"
+        value={roundResult.second}
+        onChange={(v) => handleInput("second", v)}
+        players={players}
+        disabledPlayers={[roundResult.first, roundResult.third].filter(Boolean)}
+      />
 
-      <select className="w-full p-2 text-sm text-gray-900 bg-gray-400 rounded-xl"
-      value={roundResult.second} onChange={(e) => handleInput("second", e.target.value)}
-      >
-      <option value="">เลือกอันดับ 2 (1 คะแนน)</option>
-      {players.map((p) => (
-      <option key={p} value={p} disabled={p === roundResult.first || p === roundResult.third}> {p} </option>
-      ))}
-      </select>
-
-
-      <select className="w-full p-2 text-sm text-gray-900 bg-gray-400 rounded-xl"
-      value={roundResult.third} onChange={(e) => handleInput("third", e.target.value)}
-      >
-      <option value="">เลือกอันดับ 3 (0 คะแนน)</option>
-      {players.map((p) => (
-      <option key={p} value={p} disabled={p === roundResult.first || p === roundResult.second}> {p} </option>
-      ))}
-      </select>
+      <CustomSelect
+        label="🥉 อันดับ 3"
+        value={roundResult.third}
+        onChange={(v) => handleInput("third", v)}
+        players={players}
+        disabledPlayers={[roundResult.first, roundResult.second].filter(Boolean)}
+      />
 
       <div className="relative w-full z-10 text-center text-xs bg-green-600 hover:bg-green-700 p-3 rounded-xl font-bold"
       onClick={handleSubmit}>บันทึกคะแนน</div>
         <div className="flex">
           <i className="fi fi-rr-info text-sky-600 font-bold mr-2"></i>
-          <p className="text-[0.8rem] text-sky-600">คะแนนจะบันทึกไว้ภายในเครื่องของท่าน หากมีการเคลียแคชอาจทำให้คะแนนหายได้</p>
+          <p className="text-[0.7rem] text-sky-600">คะแนนจะบันทึกไว้ภายในเครื่องของท่าน หากมีการเคลียแคชอาจทำให้คะแนนหายได้</p>
         </div>
       
       </div>
-      
-      
       </div>
 
       {/* History list (Collapsible) */}
@@ -816,13 +851,13 @@ const getTrendIcon = (player) => {
         return (
           <>
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-yellow-500/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
+              <div className="group block bg-yellow-500/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
                 <div className="text-2xl font-bold">🥇 {s.first}</div>
               </div>
-              <div className="bg-gray-400/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
+              <div className="group block bg-gray-400/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
                 <div className="text-2xl font-bold">🥈 {s.second}</div>
               </div>
-              <div className="bg-orange-500/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
+              <div className="group block bg-orange-500/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
                 <div className="text-2xl font-bold">🥉 {s.third}</div>
               </div>
             </div>
