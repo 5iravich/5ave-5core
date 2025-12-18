@@ -440,15 +440,23 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
           const selected = value === p;
 
           return (
-            <button
+            <div
               key={p}
               disabled={disabled}
-              onClick={() => onChange(p)}
+              onClick={() => {
+                if (disabled) return;
+
+                if (value === p) {
+                  onChange("");     // 👈 คลิกซ้ำ = เอาออก
+                } else {
+                  onChange(p);      // 👈 เลือกใหม่
+                }
+              }}
               className={`
-                relative p-1 rounded-xl text-xs font-bold transition-all duration-300
+                relative p-1 rounded-xl text-xs text-center font-bold transition-all duration-300
                 ${selected
                   ? `bg-gradient-to-br ${colorMap[p]} scale-105 shadow-lg`
-                  : `bg-gray-500 hover:bg-gray-500/50 hover:scale-110`}
+                  : `bg-gray-600 hover:bg-gray-500/50 hover:scale-110`}
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
             >
@@ -458,7 +466,7 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
                 </span>
               )}
               {p}
-            </button>
+            </div>
           );
         })}
       </div>
