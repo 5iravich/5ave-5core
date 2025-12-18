@@ -373,14 +373,14 @@ const streakLeader = players.filter(
 );
 
 const leftOffsetMap = {
-  Meen: -3.33,   // %
+  Meen: -3.40,   // %
   Cho: -3.33,
   Faii: -3.33,
 };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
-      <img src={loop} alt="loop" className="min-h-screen scale-150 opacity-10 " />
+      <img src={loop} alt="loop" className="min-h-screen scale-150 opacity-3 " />
 
       {/* ******************* แจ้งเตือนเวลาโบนัส ******************* */}
       {bonusAlert && (
@@ -405,7 +405,7 @@ const leftOffsetMap = {
       <div className="fixed inset-0 flex items-center justify-center">
       
       {/* ******************* SCORE GRAPH ******************* */}
-        <div className="flex-1 w-full max-w-4xl mx-auto bg-gray-900/30 p-4">
+        <div className="flex-1 w-full max-w-4xl mx-auto p-4">
           <div className="relative w-full h-[850px]">
             {/* 🏁 FINISH LINE (Checkered) */}
             <div className="absolute left-0 w-full z-20 pointer-events-none">
@@ -426,6 +426,37 @@ const leftOffsetMap = {
                   {chartData.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
+                  <LabelList
+                    dataKey="name"
+                    content={({ x, y, width, height, value }) => (
+                      <text
+                        x={x+3}
+                        y={y+59}
+                        textAnchor="end"
+                        transform={`rotate(-90, ${x}, ${y})`}
+                        fontSize={89}
+                        fontWeight="800"
+                        fontFamily="'Orbitron', 'Kanit', sans-serif"
+                        opacity={0.3}
+                        fill={
+                          value === "Meen"
+                            ? "#fecaca"
+                            : value === "Cho"
+                            ? "#bbf7d0"
+                            : "#bfdbfe"
+                        }
+                        style={{
+                          textShadow: `
+                            0 0 2px rgba(255,255,255,0.3),
+                            0 0 4px rgba(255,255,255,0.2),
+                            0 0 7px rgba(255,255,255,0.2)
+                          `,
+                        }}
+                      >
+                        {value}
+                      </text>
+                    )}
+                  />
                 </Bar>
               </BarChart>
               
@@ -449,7 +480,7 @@ const leftOffsetMap = {
                 <motion.img
                   key={d.name}
                   src={carMap[d.name]}
-                  className="absolute w-[200px] h-[130px] mb-5 pointer-events-none list-none "
+                  className="absolute w-[200px] h-[130px] mb-5 hover:scale-110 transition-all duration-300"
                   animate={{
                     left: `${leftPercent + (leftOffsetMap[d.name] ?? 0)}%`,
                     bottom: `${bottomPercent}%`,
@@ -651,16 +682,16 @@ const leftOffsetMap = {
     {history.length === 0 ? (
       <div className="text-gray-400 text-sm mt-3">ยังไม่มีประวัติ</div>
     ) : (
-      <div className="space-y-3 overflow-y-auto max-h-[90vh] pr-2 transition-all duration-300 custom-scrollbar">
+      <div className="overflow-y-auto max-h-[90vh] transition-all duration-300 custom-scrollbar">
         {history
           .slice()
           .reverse()
           .map((r, i) => (
             <div key={i} className="block group p-2 overflow-hidden ">
-              <div className="relative p-3 text-sm hover:shadow-lg bg-white/5 rounded-xl border border-l-5  border-l-red-500 border-white/10 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+              <div className="relative p-2 text-sm hover:shadow-lg bg-white/5 rounded-xl border border-l-5  border-l-red-500 border-white/10 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-15 h-15 bg-red-500/10 rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
                 <img className="absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500" src={pattern} alt="pattern" />
-              <div className="text-gray-300 text-xs mb-3">{r.time}</div>
+              <div className="text-gray-300 text-xs mb-2">{r.time}</div>
               <div className="flex justify-center">
                 <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 rounded-l-2xl bg-white">🥇 {r.first}</div>
                 <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 bg-white">🥇 {r.second}</div>
