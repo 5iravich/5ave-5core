@@ -428,6 +428,7 @@ const leftOffsetMap = {
                   ))}
                 </Bar>
               </BarChart>
+              
             </ResponsiveContainer>
 
             {/* 🚗 Overlay รถ */}
