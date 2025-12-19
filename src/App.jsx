@@ -14,35 +14,107 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, C
 
 export default function App() {
   
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    setIsLoading(false);
+  }, 2500); // ⏱ ปรับเวลาได้
+    return () => clearTimeout(timer);
+}, []);
+
+  function LoadingScreen({ carRed, carGreen, carBlue }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-950 overflow-hidden"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* แสงวิ่ง */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+
+      {/* รถวิ่ง */}
+      <div className="relative w-full max-w-md h-40">
+        <motion.img
+          src={carRed}
+          className="absolute w-28 mx-10 rotate-90"
+          initial={{ x: -200 }}
+          animate={{ x: 420 }}
+          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+        />
+        <motion.img
+          src={carGreen}
+          className="absolute w-28 mx-40 rotate-90 top-10"
+          initial={{ x: -260 }}
+          animate={{ x: 420 }}
+          transition={{ repeat: Infinity, duration: 1.4, ease: "linear" }}
+        />
+        <motion.img
+          src={carBlue}
+          className="absolute w-28 mx-70 rotate-90 top-20"
+          initial={{ x: -320 }}
+          animate={{ x: 420 }}
+          transition={{ repeat: Infinity, duration: 1.6, ease: "linear" }}
+        />
+      </div>
+
+      {/* ข้อความ */}
+      <div className="absolute bottom-24 text-center">
+        <motion.div
+          className="text-xl font-extrabold tracking-widest"
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 1.2 }}
+        >
+          กำลังโหลดทรัพยากร
+        </motion.div>
+        <div className="text-xs text-gray-400 mt-2">
+          เตรียมความพร้อมสนาม...
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
   const players = ["Meen", "Cho", "Faii"]; // รายชื่อผู้แข่งขัน
 
+  const firstPlaceColorMap = {
+  Meen: "border-l-red-500",
+  Cho: "border-l-green-500",
+  Faii: "border-l-blue-500",
+};
+
+
+  // เริ่มคะแนน
   const [scores, setScores] = useState(() => {
     const saved = localStorage.getItem("scores");
     return saved ? JSON.parse(saved) : { Meen: 0, Cho: 0, Faii: 0 };
   });
-
+  
+  // อันดับคะแนน
   const [roundResult, setRoundResult] = useState({
     first: "",
     second: "",
     third: "",
   });
 
+  // ประวัติคะแนน
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("history");
     return saved ? JSON.parse(saved) : [];
   });
 
+  // โหลดประวัติคะแนน
   useEffect(() => {
     localStorage.setItem("history", JSON.stringify(history));
   }, [history]);
 
-  // LOAD saved
+  // โหลดบันทึก
   useEffect(() => {
     const saved = localStorage.getItem("scores");
     if (saved) setScores(JSON.parse(saved));
   }, []);
 
-  // SAVE on change
+  // บันทึกคะแนน
   useEffect(() => {
     localStorage.setItem("scores", JSON.stringify(scores));
   }, [scores]);
@@ -461,8 +533,8 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
               `}
             >
               {selected && (
-                <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full">
-                  ✓
+                <span className="absolute top-1 right-1 bg-white text-black text-[0.25rem] p-1 rounded-full">
+                  
                 </span>
               )}
               {p}
@@ -473,7 +545,18 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
     </div>
   );
 }
+
+
   return (
+    <>
+    {isLoading && (
+      <LoadingScreen
+        carRed={carRed}
+        carGreen={carGreen}
+        carBlue={carBlue}
+      />
+    )}
+
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
       <img src={loop} alt="loop" className="min-h-screen scale-150 opacity-3 " />
 
@@ -501,6 +584,16 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
       
       {/* ******************* SCORE GRAPH ******************* */}
         <div className="flex-1 w-full max-w-4xl mx-auto p-4">
+          {bonusRemain > 0 && (
+          <div className="flex justify-center -mt-2 mb-6 z-50">
+            <div className={`px-16 py-2 rounded-b-full font-bold border ${isCritical ? 
+              " bg-red-500/20 border-red-400 text-red-400 animate-pulse" : 
+              "bg-yellow-500/20 border-yellow-400 text-yellow-300 animate-pulse"}`} 
+              style={isCritical ? { animation: "shake 0.4s infinite" } : {}}>
+              🔥 โบนัสกำลังทำงาน เหลือเวลาอีก {formatTime(bonusRemain)}
+            </div>
+          </div>
+        )}
           <div className="relative w-full h-[850px]">
             {/* 🏁 FINISH LINE (Checkered) */}
             <div className="absolute left-0 w-full z-20 pointer-events-none">
@@ -517,14 +610,14 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
                 <XAxis dataKey="name" hide />
                 <YAxis hide />
 
-                <Bar dataKey="score" barSize={60}>
+                <Bar dataKey="score" barSize={60} className="">
                   {chartData.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
                   <LabelList
                     dataKey="name"
                     content={({ x, y, width, height, value }) => (
-                      <text
+                      <text className="animate-pulse"
                         x={x+3}
                         y={y+59}
                         textAnchor="end"
@@ -608,15 +701,7 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
       <div className="absolute bottom-4 right-4 items-center p-6">
         
       <div>
-        {bonusRemain > 0 && (
-          <div className="flex justify-center mb-2">
-            <div className={`px-4 py-2 rounded-full font-bold border ${isCritical ? " bg-red-500/20 border-red-400 text-red-400 animate-pluse" : "bg-yellow-500/20 border-yellow-400 text-yellow-300 animate-pluse"}
-      `} style={isCritical ? { animation: "shake 0.4s infinite" } : {}}
-    >
-              🔥 โบนัสกำลังทำงาน เหลือเวลา {formatTime(bonusRemain)}
-            </div>
-          </div>
-        )}
+        
       </div>
         <h3 className="text-center text-xl font-bold mb-4">ระบบเก็บคะแนนผู้แข่งขัน</h3>
         {/* คะแนนรวม */}
@@ -781,7 +866,12 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
           .reverse()
           .map((r, i) => (
             <div key={i} className="block group p-2 overflow-hidden ">
-              <div className="relative p-2 text-sm hover:shadow-lg bg-white/5 rounded-xl border border-l-5  border-l-red-500 border-white/10 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+              <div
+                className={`relative p-2 text-sm hover:shadow-lg bg-white/5 rounded-xl
+                border border-l-4 border-white/10
+                ${firstPlaceColorMap[r.first] ?? "border-l-gray-500"}
+                hover:scale-[1.02] transition-all duration-300 overflow-hidden`}
+              >
                 <div className="absolute top-0 right-0 w-15 h-15 bg-red-500/10 rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
                 <img className="absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500" src={pattern} alt="pattern" />
               <div className="text-gray-300 text-xs mb-2">{r.time}</div>
@@ -938,6 +1028,7 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
 
 
       </div>
-
+    </>
   );
+  
 }
