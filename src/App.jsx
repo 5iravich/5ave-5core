@@ -247,8 +247,6 @@ export default function App() {
     return saved ? JSON.parse(saved) : false;
   });
 
-  const [historyFilter, setHistoryFilter] = useState("ALL");
-
   useEffect(() => {
     localStorage.setItem("showHistory", JSON.stringify(showHistory));
   }, [showHistory]);
@@ -498,8 +496,8 @@ const getTrendIcon = (player) => {
     if (r.second === player) trend += 1;
   });
 
-  if (trend >= 6) return "📈 นำยิ่งยวด";
-  if (trend <= 2) return "📉 ร่วงดิ่งลง";
+  if (trend >= 6) return "📈";
+  if (trend <= 2) return "📉";
   return "➖";
 };
 
@@ -536,7 +534,7 @@ function CustomSelect({ label, value, onChange, players, disabledPlayers }) {
                 relative p-1 rounded-xl text-xs text-center font-bold transition-all duration-300
                 ${selected
                   ? `bg-gradient-to-br ${colorMap[p]} scale-105 shadow-lg`
-                  : `bg-gray-600 hover:bg-gray-500/50 hover:scale-110`}
+                  : `bg-gray-600 hover:bg-gray-500/50 hover:scale-105`}
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
             >
@@ -891,44 +889,23 @@ const loseStreaks = getLoseStreaks();
     style={{ pointerEvents: showHistory ? "auto" : "none" }}
   >
     <h2 className="text-lg font-semibold mb-3">ประวัติการแข่งขัน <a className="ml-2 text-xs">( ทั้งหมด {totalRounds} รอบ )</a> </h2>
-    <div className="flex gap-2 mb-3 text-xs">
-  {[
-    { key: "ALL", label: "ทั้งหมด" },
-    { key: "WIN", label: "🥇 ชนะ" },
-    { key: "LOSE", label: "💀 แพ้" },
-    { key: "BONUS", label: "⚡ โบนัส" },
-  ].map(t => (
-    <button
-      key={t.key}
-      onClick={() => setHistoryFilter(t.key)}
-      className={`px-2 py-1 rounded-lg font-bold transition
-        ${historyFilter === t.key
-          ? "bg-white text-black"
-          : "bg-white/10 hover:bg-white/20"}`}
-    >
-      {t.label}
-    </button>
-  ))}
-</div>
-
 
     {history.length === 0 ? (
       <div className="text-gray-400 text-sm mt-3">ยังไม่มีประวัติ</div>
     ) : (
       <div className="overflow-y-auto max-h-[90vh] transition-all duration-300 custom-scrollbar">
         {history
-          .slice()
-          .reverse()
-          .map((r, i) => (
+        .slice()
+        .reverse()
+        .map((r, i) => (
             <div key={i} className="block group p-2 overflow-hidden ">
-              <div
-                className={`relative p-2 text-sm hover:shadow-lg rounded-xl
+              <div className={`relative p-2 text-sm hover:shadow-lg rounded-xl
                 border border-l-4 border-white/10
                 ${firstPlaceColorMap[r.first] ?? "border-l-gray-500"}
                 hover:scale-[1.02] transition-all duration-300 overflow-hidden`}
               >
                 <div className={`absolute top-0 right-0 w-15 h-15 ${OPlaceColorMap[r.first] ?? "bg-gray-500/10" } rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500`}></div>
-                <img className="absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500" src={pattern} alt="pattern" />
+                <img className={`absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500 `} src={pattern} alt="pattern" />
               <div className="text-gray-300 text-xs mb-2">{r.time}</div>
               <div className="flex justify-center">
                 <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 rounded-l-2xl bg-white">🥇 {r.first}</div>
@@ -942,6 +919,7 @@ const loseStreaks = getLoseStreaks();
               )}
               </div>
               
+              
             </div>
           ))}
       </div>
@@ -954,105 +932,104 @@ const loseStreaks = getLoseStreaks();
         
         {activePlayer && (
   <motion.div
-  className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  onClick={() => setActivePlayer(null)}   // 👈 คลิกที่อื่น = ปิด
->
-    <div
-      className="bg-gray-900 rounded-2xl p-6 w-[320px] text-center shadow-2xl relative"
-      onClick={(e) => e.stopPropagation()}   // 👈 กัน event ไม่ให้เด้งไป overlay
-    >
-      <button
-        onClick={() => setActivePlayer(null)}
-        className="absolute top-3 right-3 text-gray-400 hover:text-white"
-      >
-        ✕
-      </button>
-      
-
+    className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center"
+    initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setActivePlayer(null)}   // 👈 คลิกที่อื่น = ปิด
+  >
+    <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 w-[360px] text-center shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+      {/*กัน event ไม่ให้เด้งไป overlay */}
+      <a onClick={() => setActivePlayer(null)} className="absolute top-3 right-3 text-gray-400 hover:text-white">✕</a>
       <h2 className="text-xl font-bold mb-4">{activePlayer} – สถิติ</h2>
 
       {(() => {
         const s = getPlayerStats(activePlayer);
         return (
           <>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="group block bg-yellow-500/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
+          {/* ช่องว่างคะแนน */}
+          <div className="flex justify-center text-sm font-bold">
+            {getGapFromLeader(activePlayer) === 0 ? (
+              <span className="text-green-400">
+                🏆 นำเป็นอันดับ 1
+              </span>
+            ) : (
+              <span className="text-red-400">
+                ⏱ ตามอันดับ 1 อยู่ {getGapFromLeader(activePlayer)} แต้ม
+                {getGapFromLeader(activePlayer) < 2 && (
+                  <motion.span
+                    className="ml-2 text-yellow-300"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 1 }}
+                  >
+                    🔥 ใกล้แซง!
+                  </motion.span>
+                )}
+              </span>
+            )}
+            {activePlayer === getLeader() && (
+            <div className="px-2 text-sm text-blue-400 font-semibold">
+              🥈 นำอันดับ 2 อยู่ {getLeadOverSecond(activePlayer)} แต้ม
+            </div>
+          )}
+          </div>
+          <div className="flex justify-center gap-3 p-2 my-3 border-2 border-blue-900/30 rounded-2xl hover:scale-101 transition-all duration-300">
+            <div className="">
+              <div className="group block my-2 bg-yellow-500/30 rounded-xl p-2 hover:scale-105 transition-all duration-300">
                 <div className="text-2xl font-bold">🥇 {s.first}</div>
               </div>
-              <div className="group block bg-gray-400/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
+              <div className="group block my-2 bg-gray-400/30 rounded-xl p-2 hover:scale-105 transition-all duration-300">
                 <div className="text-2xl font-bold">🥈 {s.second}</div>
               </div>
-              <div className="group block bg-orange-500/20 rounded-xl p-2 hover:scale-110 transition-all duration-300">
+              <div className="group block my-2 bg-orange-500/30 rounded-xl p-2 hover:scale-105 transition-all duration-300">
                 <div className="text-2xl font-bold">🥉 {s.third}</div>
               </div>
             </div>
-
-            <div className="mt-2">
-              <div className="text-sm text-gray-400">อัตราชนะ</div>
+            <div className="">
+              <div className="my-2 p-3 bg-green-500/30 rounded-xl hover:scale-105 transition-all duration-300">
+              <div className="text-sm text-green-400">อัตราชนะ</div>
               <div className="text-3xl font-extrabold text-green-400">
                 {s.winRate}%
               </div>
+              </div>
+              <div className="my-2 p-2 bg-blue-500/30 rounded-xl hover:scale-105 transition-all duration-300">
+                <div className="text-sm text-blue-400">แนวโน้มล่าสุด</div> 
+                <div className="text-3xl font-extrabold text-blue-400">{getTrendIcon(activePlayer)}</div>
+              </div>
             </div>
-            {/* ช่องว่างคะแนน */}
-<div className="mt-2 text-sm font-bold">
-  {getGapFromLeader(activePlayer) === 0 ? (
-    <span className="text-green-400">
-      🏆 นำเป็นอันดับ 1
-    </span>
-  ) : (
-    <span className="text-red-400">
-      ⏱ ตามอันดับ 1 อยู่ {getGapFromLeader(activePlayer)} แต้ม
-      {getGapFromLeader(activePlayer) < 2 && (
-        <motion.span
-          className="ml-2 text-yellow-300"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ repeat: Infinity, duration: 1 }}
-        >
-          🔥 ใกล้แซง!
-        </motion.span>
-      )}
-    </span>
-  )}
-  {activePlayer === getLeader() && (
-  <div className="mt-1 text-sm text-blue-400 font-semibold">
-    🥈 นำอันดับ 2 อยู่ {getLeadOverSecond(activePlayer)} แต้ม
+          </div>   
+          <div className="py-1 border-2 border-blue-900/30 rounded-2xl hover:scale-101 transition-all duration-300">
+            <span className="text-sm text-gray-400 ">สถิติตลอดกาล</span>
+            <div className="flex justify-center">
+              <div className="m-2 p-3 text-green-400 font-semibold bg-green-500/30 rounded-xl hover:scale-105 transition-all duration-300">
+                <p className="text-[0.75rem]">ชนะติดต่อกันสูงสุด</p>
+                <p className="mt-2 text-3xl">🔥 {winStreaks[activePlayer]}</p>
+              </div>
+              <div className="m-2 p-3 text-red-400 font-semibold bg-red-500/30 rounded-xl hover:scale-105 transition-all duration-300">
+                <p className="text-[0.75rem]">แพ้ติดต่อกันสูงสุด</p>
+                <p className="mt-2 text-3xl">💀 {loseStreaks[activePlayer]}</p>
+              </div>
+            </div>
+          </div>
+  {/* Progress เทียบผู้นำ */}
+  <div className="mt-4">
+    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+      <motion.div
+        className="h-full bg-gradient-to-r from-green-400 to-emerald-500"
+        initial={{ width: 0 }}
+        animate={{
+          width: `${
+            (scores[activePlayer] / Math.max(scores[getLeader()], 1)) * 100
+          }%`,
+        }}
+        transition={{ duration: 0.6 }}
+      />
+    </div>
+    <div className="flex justify-between text-xs text-gray-400 mt-1">
+      <span>คะแนน</span>
+      <span>
+        {scores[activePlayer]} / {scores[getLeader()]}
+      </span>
+    </div>
   </div>
-)}
-</div>
 
-          {/* Progress เทียบผู้นำ */}
-<div className="mt-4">
-  <div className="flex justify-between text-xs text-gray-400 mb-1">
-    <span>คะแนน</span>
-    <span>
-      {scores[activePlayer]} / {scores[getLeader()]}
-    </span>
-  </div>
-
-  <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-    <motion.div
-      className="h-full bg-gradient-to-r from-green-400 to-emerald-500"
-      initial={{ width: 0 }}
-      animate={{
-        width: `${
-          (scores[activePlayer] / Math.max(scores[getLeader()], 1)) * 100
-        }%`,
-      }}
-      transition={{ duration: 0.6 }}
-    />
-  </div>
-</div>
-
-<div className="text-sm text-gray-400 mt-1">
-  แนวโน้ม 5 รอบล่าสุด {getTrendIcon(activePlayer)}
-  {loseStreaks[activePlayer] > 1 && (
-  <div className="mt-2 text-sm text-red-400 font-bold animate-pulse">
-    💀 แพ้ติด {loseStreaks[activePlayer]} รอบ
-  </div>
-)}
-</div>
           </>
         );
       })()}
