@@ -89,6 +89,12 @@ export default function App() {
   Faii: "bg-blue-500/10",
 };
 
+ const ScoreMap = {
+  Meen: "border-red-900",
+  Cho: "border-green-900",
+  Faii: "border-blue-900",
+};
+
 
   // เริ่มคะแนน
   const [scores, setScores] = useState(() => {
@@ -572,6 +578,30 @@ const getLoseStreaks = () => {
 
 const loseStreaks = getLoseStreaks();
 
+const getTodayMVP = () => {
+  if (history.length === 0) return [];
+
+  const today = new Date().toLocaleDateString();
+  const dailyScore = { Meen: 0, Cho: 0, Faii: 0 };
+
+  history.forEach((h) => {
+    const roundDate = new Date(h.time).toLocaleDateString();
+    if (roundDate === today) {
+      const bonus = h.bonus ? 2 : 1;
+      dailyScore[h.first] += 2 * bonus;
+      dailyScore[h.second] += 1 * bonus;
+    }
+  });
+
+  const max = Math.max(...Object.values(dailyScore));
+  if (max === 0) return [];
+
+  return Object.keys(dailyScore).filter(
+    (p) => dailyScore[p] === max
+  );
+};
+
+const todayMVP = getTodayMVP();
 
   return (
     <>
@@ -729,9 +759,9 @@ const loseStreaks = getLoseStreaks();
       <div>
         
       </div>
-        <h3 className="text-center text-xl font-bold mb-4">ระบบเก็บคะแนนผู้แข่งขัน</h3>
+        <h3 className="text-center text-xl font-bold mb-3">ระบบเก็บคะแนนผู้แข่งขัน</h3>
         {/* คะแนนรวม */}
-      <div className="grid grid-cols-3 gap-3 mb-4 w-full max-w-xl">
+      <div className="grid grid-cols-3 gap-3 mb-2 w-full max-w-xl">
         {players.map((p) => (
           <div
             key={p}
@@ -749,10 +779,20 @@ const loseStreaks = getLoseStreaks();
                 initial={{ scale: 1 }}
                 animate={{ scale: [1, 1.4, 1] }}
                 transition={{ duration: 0.4 }}
-                className="text-3xl font-bold mb-2"
+                className="text-[2.5rem] font-bold -m-4"
               >
                 {scores[p]}
               </motion.p>
+              {todayMVP.includes(p) && (
+                <motion.div
+                  className="absolute bottom-1.5 right-3.5 mt-1 px-3 text-[0.5rem] font-extrabold text-gray-900 bg-yellow-300/70 rounded-full z-10"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
+                >
+                  ⭐ MVP วันนี้
+                </motion.div>
+              )}
+
 
               <p className="text-xs mt-1 opacity-70">อัตราชนะ</p>
               <div className="flex justify-center">
@@ -768,24 +808,6 @@ const loseStreaks = getLoseStreaks();
                 glow={isTopWinner(p)}
               />
               </div>
-              {winStreaks[p] > 1 && (
-  <p className="text-xs mt-1 text-yellow-400 font-semibold animate-pulse">
-    🔥 ชนะติด {winStreaks[p]} รอบ
-  </p>
-)}
-
-{winStreaks[p] <= 1 && loseStreaks[p] > 1 && (
-  <p className="text-xs mt-1 text-red-400 font-semibold animate-pulse">
-    💀 แพ้ติด {loseStreaks[p]} รอบ
-  </p>
-)}
-
-{winStreaks[p] <= 1 && loseStreaks[p] <= 1 && (
-  <p className="text-xs mt-1 text-gray-400 font-semibold">
-    พร้อมลุย!
-  </p>
-)}
-
             </div>
           </div>
         ))}
@@ -898,22 +920,22 @@ const loseStreaks = getLoseStreaks();
         .slice()
         .reverse()
         .map((r, i) => (
-            <div key={i} className="block group p-2 overflow-hidden ">
-              <div className={`relative p-2 text-sm hover:shadow-lg rounded-xl
+            <div key={i} className="block group p-[0.2rem] mr-2 overflow-hidden ">
+              <div className={`relative p-3 text-sm hover:shadow-lg rounded-xl
                 border border-l-4 border-white/10
                 ${firstPlaceColorMap[r.first] ?? "border-l-gray-500"}
                 hover:scale-[1.02] transition-all duration-300 overflow-hidden`}
               >
-                <div className={`absolute top-0 right-0 w-15 h-15 ${OPlaceColorMap[r.first] ?? "bg-gray-500/10" } rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500`}></div>
+                <div className={`absolute top-0 right-5 w-15 h-15 ${OPlaceColorMap[r.first] ?? "bg-gray-500/10" } rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500`}></div>
                 <img className={`absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500 `} src={pattern} alt="pattern" />
               <div className="text-gray-300 text-xs mb-2">{r.time}</div>
               <div className="flex justify-center">
-                <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 rounded-l-2xl bg-white">🥇 {r.first}</div>
-                <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 bg-white">🥇 {r.second}</div>
-                <div className="py-2 px-3 font-medium text-xs text-gray-900 border-1 border-red-300 rounded-r-2xl bg-white">🥉 {r.third}</div>
+                <div className={`py-2 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 rounded-l-md border-r-5 ${ScoreMap[r.first]}`}>🥇 {r.first}</div>
+                <div className={`py-2 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 border-r-5 ${ScoreMap[r.second]}`}>🥇 {r.second}</div>
+                <div className={`py-2 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 rounded-r-md border-r-5 ${ScoreMap[r.third]}`}>🥉 {r.third}</div>
               </div>
               {r.bonus && (
-                <div className="text-xs text-yellow-400 font-bold text-center mt-2">
+                <div className="text-xs text-gray-900 bg-yellow-400/70 font-bold text-center mt-2 rounded-full">
                   ⚡ PEAK TIME ZONE // BONUS TIME x 2
                 </div>
               )}
@@ -937,7 +959,7 @@ const loseStreaks = getLoseStreaks();
   >
     <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 w-[360px] text-center shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
       {/*กัน event ไม่ให้เด้งไป overlay */}
-      <a onClick={() => setActivePlayer(null)} className="absolute top-3 right-3 text-gray-400 hover:text-white">✕</a>
+      <a onClick={() => setActivePlayer(null)} className="absolute top-3 right-5 text-gray-400 hover:text-white">✕</a>
       <h2 className="text-xl font-bold mb-4">{activePlayer} – สถิติ</h2>
 
       {(() => {
