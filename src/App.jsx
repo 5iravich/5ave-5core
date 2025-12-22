@@ -361,32 +361,41 @@ export default function App() {
   }
 
   const [bonusAlert, setBonusAlert] = useState(false);
+  const [preBonusCountdown, setPreBonusCountdown] = useState(null);
+
 
   useEffect(() => {
-    const checkBonusTime = () => {
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
+  const interval = setInterval(() => {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
 
-      // เข้า 16:15 พอดี
-      if (hours === 16 && minutes === 15) {
-        const alerted = localStorage.getItem("bonusAlerted");
+    // ⏱ ก่อนเข้าโบนัส 10 วิ (16:14:50 - 16:14:59)
+    if (h === 16 && m === 14 && s >= 50) {
+      setPreBonusCountdown(60 - s); // 10 → 1
+    } else {
+      setPreBonusCountdown(null);
+    }
 
-        if (!alerted) {
-          setBonusAlert(true);
-          localStorage.setItem("bonusAlerted", "true");
-        }
+    // ⚡ เข้าโบนัส 16:15
+    if (h === 16 && m === 15) {
+      const alerted = localStorage.getItem("bonusAlerted");
+      if (!alerted) {
+        setBonusAlert(true);
+        localStorage.setItem("bonusAlerted", "true");
       }
+    }
 
-      // รีเซ็ตวันถัดไป
-      if (hours === 0 && minutes === 0) {
-        localStorage.removeItem("bonusAlerted");
-      }
-    };
+    // รีเซ็ตวันถัดไป
+    if (h === 0 && m === 0) {
+      localStorage.removeItem("bonusAlerted");
+    }
+  }, 1000);
 
-    const interval = setInterval(checkBonusTime, 30 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
+
 
 const getBonusRemaining = () => {
   const now = new Date();
@@ -578,6 +587,36 @@ const getLoseStreaks = () => {
 
 const loseStreaks = getLoseStreaks();
 
+const getCurrentWinStreak = (player) => {
+  let streak = 0;
+
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i].first === player) {
+      streak++;
+    } else {
+      break; // แพ้ = หยุดทันที
+    }
+  }
+
+  return streak;
+};
+
+const getCurrentLoseStreak = (player) => {
+  let streak = 0;
+
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i].first !== player) {
+      streak++;
+    } else {
+      break; // ชนะ = หยุด
+    }
+  }
+
+  return streak;
+};
+
+
+
 const getTodayMVP = () => {
   if (history.length === 0) return [];
 
@@ -615,6 +654,30 @@ const todayMVP = getTodayMVP();
 
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
       <img src={loop} alt="loop" className="min-h-screen scale-150 opacity-3 " />
+
+      {/* ⏱ PRE BONUS COUNTDOWN */}
+    {preBonusCountdown !== null && (
+      <motion.div
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <motion.div
+          key={preBonusCountdown}
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1.2, opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="text-center"
+        >
+          <div className="text-[10rem] font-extrabold text-red-500 drop-shadow-[0_0_40px_rgba(255,0,0,0.9)]">
+            {preBonusCountdown}
+          </div>
+          <div className="mt-4 text-2xl font-bold text-white tracking-widest animate-pulse">
+            BONUS TIME INCOMING
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
 
       {/* ******************* แจ้งเตือนเวลาโบนัส ******************* */}
       {bonusAlert && (
@@ -762,16 +825,22 @@ const todayMVP = getTodayMVP();
         <h3 className="text-center text-xl font-bold mb-3">ระบบเก็บคะแนนผู้แข่งขัน</h3>
         {/* คะแนนรวม */}
       <div className="grid grid-cols-3 gap-3 mb-2 w-full max-w-xl">
-        {players.map((p) => (
+        {players.map((p) => { 
+          const winStreak = getCurrentWinStreak(p);
+          const loseStreak = getCurrentLoseStreak(p);
+          return (
           <div
             key={p}
             onClick={() => setActivePlayer(p)}
             className="block group text-center cursor-pointer"
           >
-            <div className={`relative rounded-xl p-3 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 overflow-hidden
-              ${p === 'Meen' ? 'bg-gradient-to-br from-red-800 to-red-500' 
-              : p === 'Cho' ? 'bg-gradient-to-br from-green-800 to-green-500' 
-              : 'bg-gradient-to-br from-blue-800 to-blue-500'}`}>
+            <div
+              className={`relative rounded-xl p-3 cursor-pointer overflow-hidden
+                hover:shadow-lg hover:scale-[1.02] transition-all duration-300
+                ${p === 'Meen' ? 'bg-gradient-to-br from-red-800 to-red-500' 
+                : p === 'Cho' ? 'bg-gradient-to-br from-green-800 to-green-500' 
+                : 'bg-gradient-to-br from-blue-800 to-blue-500'}`}
+>
             <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
               <h2 className="text-md font-semibold">{p}</h2>
               <motion.p
@@ -808,9 +877,30 @@ const todayMVP = getTodayMVP();
                 glow={isTopWinner(p)}
               />
               </div>
+              {winStreak >= 3 && (
+                  <div className="absolute inset-0 -z-10 animate-pulse">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,80,0,0.8),transparent_70%)] blur-xl" />
+                    <div className="absolute bottom-0 w-full h-16 bg-gradient-to-t from-orange-500/70 to-transparent animate-[fire_1s_infinite]" />
+                  </div>
+                )}
+              {loseStreak >= 3 && (
+                <div className="absolute inset-0 -z-10 overflow-hidden">
+                  {[...Array(20)].map((_, i) => (
+                    <span
+                      key={i}
+                      className="absolute top-0 w-[2px] h-6 bg-blue-300/60 animate-[rain_1s_linear_infinite]"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random()}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
             </div>
           </div>
-        ))}
+        )})}
         
       </div>
         <div className="grid grid-cols-3 gap-3 mb-4 w-full max-w-xl">
@@ -919,20 +1009,35 @@ const todayMVP = getTodayMVP();
         {history
         .slice()
         .reverse()
-        .map((r, i) => (
+        .map((r, i) => { const isLatest = i === 0; return (
             <div key={i} className="block group p-[0.2rem] mr-2 overflow-hidden ">
               <div className={`relative p-3 text-sm hover:shadow-lg rounded-xl
                 border border-l-4 border-white/10
                 ${firstPlaceColorMap[r.first] ?? "border-l-gray-500"}
                 hover:scale-[1.02] transition-all duration-300 overflow-hidden`}
               >
+                {/* 🔥 LATEST BADGE */}
+                {isLatest && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute top-5 -right-6 py-0.5
+                              text-xl font-extrabold
+                              text-yellow-200/30
+                              animate-pulse -z-10"
+                    style={{rotate: -90}}
+                  >
+                    LATEST
+                  </motion.div>
+                )}
                 <div className={`absolute top-0 right-5 w-15 h-15 ${OPlaceColorMap[r.first] ?? "bg-gray-500/10" } rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500`}></div>
                 <img className={`absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500 `} src={pattern} alt="pattern" />
               <div className="text-gray-300 text-xs mb-2">{r.time}</div>
               <div className="flex justify-center">
-                <div className={`py-2 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 rounded-l-md border-r-5 ${ScoreMap[r.first]}`}>🥇 {r.first}</div>
-                <div className={`py-2 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 border-r-5 ${ScoreMap[r.second]}`}>🥇 {r.second}</div>
-                <div className={`py-2 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 rounded-r-md border-r-5 ${ScoreMap[r.third]}`}>🥉 {r.third}</div>
+                <div className={`py-1 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 rounded-l-md border-r-5 ${ScoreMap[r.first]}`}>🥇 {r.first}</div>
+                <div className={`py-1 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 border-r-5 ${ScoreMap[r.second]}`}>🥇 {r.second}</div>
+                <div className={`py-1 px-3 font-semibold text-xs text-gray-900 bg-white -skew-x-25 rounded-r-md border-r-5 ${ScoreMap[r.third]}`}>🥉 {r.third}</div>
               </div>
               {r.bonus && (
                 <div className="text-xs text-gray-900 bg-yellow-400/70 font-bold text-center mt-2 rounded-full">
@@ -943,7 +1048,7 @@ const todayMVP = getTodayMVP();
               
               
             </div>
-          ))}
+          )})}
       </div>
     )}
   </motion.div>

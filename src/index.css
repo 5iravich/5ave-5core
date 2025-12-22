@@ -92,3 +92,20 @@ h1 {
   animation: shineUp 2.5s linear infinite;
 }
 
+@keyframes fire {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes rain {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(120px);
+    opacity: 1;
+  }
+}
+
