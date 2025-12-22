@@ -822,9 +822,9 @@ const todayMVP = getTodayMVP();
       <div>
         
       </div>
-        <h3 className="text-center text-xl font-bold mb-3">ระบบเก็บคะแนนผู้แข่งขัน</h3>
+        <h3 className="text-center text-xl font-bold mb-3 z-20">ระบบเก็บคะแนนผู้แข่งขัน</h3>
         {/* คะแนนรวม */}
-      <div className="grid grid-cols-3 gap-3 mb-2 w-full max-w-xl">
+      <div className="grid grid-cols-3 gap-3 mb-2 w-full max-w-xl z-20">
         {players.map((p) => { 
           const winStreak = getCurrentWinStreak(p);
           const loseStreak = getCurrentLoseStreak(p);
@@ -832,24 +832,22 @@ const todayMVP = getTodayMVP();
           <div
             key={p}
             onClick={() => setActivePlayer(p)}
-            className="block group text-center cursor-pointer"
+            className="block group text-center cursor-pointer z-20"
           >
             <div
               className={`relative rounded-xl p-3 cursor-pointer overflow-hidden
                 hover:shadow-lg hover:scale-[1.02] transition-all duration-300
                 ${p === 'Meen' ? 'bg-gradient-to-br from-red-800 to-red-500' 
                 : p === 'Cho' ? 'bg-gradient-to-br from-green-800 to-green-500' 
-                : 'bg-gradient-to-br from-blue-800 to-blue-500'}`}
+                : 'bg-gradient-to-br from-blue-800 to-blue-500 z-20'}`}
 >
             <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500 z-0"></div>
               <h2 className="text-md font-semibold">{p}</h2>
-              <motion.p
-                key={scores[p]}
+              <motion.p key={scores[p]}
                 initial={{ scale: 1 }}
                 animate={{ scale: [1, 1.4, 1] }}
                 transition={{ duration: 0.4 }}
-                className="text-[2.5rem] font-bold -m-4"
-              >
+                className="text-[2.5rem] font-bold -m-4">
                 {scores[p]}
               </motion.p>
               {todayMVP.includes(p) && (
@@ -863,8 +861,8 @@ const todayMVP = getTodayMVP();
               )}
 
 
-              <p className="text-xs mt-1 opacity-70">อัตราชนะ</p>
-              <div className="flex justify-center">
+              <p className="text-xs mt-1 opacity-70 z-10">อัตราชนะ</p>
+              <div className="flex justify-center z-10">
                 <WinRateCircle
                 percent={winRate(p)}
                 color={
@@ -878,17 +876,19 @@ const todayMVP = getTodayMVP();
               />
               </div>
               {winStreak >= 3 && (
-                  <div className="absolute inset-0 -z-10 animate-pulse">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,80,0,0.8),transparent_70%)] blur-xl" />
-                    <div className="absolute bottom-0 w-full h-16 bg-gradient-to-t from-orange-500/70 to-transparent animate-[fire_1s_infinite]" />
-                  </div>
-                )}
+                <div className="absolute inset-0 z-0 pointer-events-none">
+                  {/* glow */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,100,0,0.9),transparent_70%)] blur-xl animate-pulse" />
+                  {/* flame */}
+                  <div className="absolute bottom-0 w-full h-20 bg-gradient-to-t from-orange-500/80 to-transparent animate-[fire_1s_infinite]" />
+                </div>
+              )}
               {loseStreak >= 3 && (
-                <div className="absolute inset-0 -z-10 overflow-hidden">
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                   {[...Array(20)].map((_, i) => (
                     <span
                       key={i}
-                      className="absolute top-0 w-[2px] h-6 bg-blue-300/60 animate-[rain_1s_linear_infinite]"
+                      className="absolute top-0 w-[2px] h-6 bg-blue-300/70 animate-[rain_1s_linear_infinite]"
                       style={{
                         left: `${Math.random() * 100}%`,
                         animationDelay: `${Math.random()}s`,
@@ -898,38 +898,35 @@ const todayMVP = getTodayMVP();
                 </div>
               )}
               {/* 🔥 ON FIRE */}
-                {/* {winStreak >= 3 && (
+                {winStreak >= 3 && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="absolute top-2 left-1/2 -translate-x-1/2
-                              px-3 py-0.5 rounded-full
-                              text-[0.65rem] font-extrabold tracking-widest
-                              bg-orange-500 text-black
-                              shadow-[0_0_20px_rgba(255,120,0,0.9)]
-                              animate-pulse z-20"
+                    className="absolute top-13 left-5/6 -translate-x-1/2
+                              px-3 py-0.5
+                              text-8xl font-extrabold tracking-widest text-orange-500/30
+                              animate-pulse z-10"
+                    style={{rotate: -90}}
                   >
-                    ON FIRE
+                    FIRE
                   </motion.div>
-                )} */}
+                )}
 
                 {/* 😵 TILTED */}
-                {/* {loseStreak >= 3 && (
+                {loseStreak >= 3 && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="absolute top-2 left-1/2 -translate-x-1/2
-                              px-3 py-0.5 rounded-full
-                              text-[0.65rem] font-extrabold tracking-widest
-                              bg-blue-500 text-white
-                              shadow-[0_0_20px_rgba(80,150,255,0.9)]
-                              animate-pulse z-20"
+                    className="absolute top-13 left-5/6 -translate-x-1/2
+                              px-3 py-0.5 text-5xl font-extrabold tracking-widest text-white/30
+                              animate-pulse z-10"
+                    style={{rotate: -90}}
                   >
                     TILTED
                   </motion.div>
-                )} */}
+                )}
 
 
             </div>
