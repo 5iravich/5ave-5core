@@ -841,7 +841,7 @@ const todayMVP = getTodayMVP();
                 : p === 'Cho' ? 'bg-gradient-to-br from-green-800 to-green-500' 
                 : 'bg-gradient-to-br from-blue-800 to-blue-500'}`}
 >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500 z-0"></div>
               <h2 className="text-md font-semibold">{p}</h2>
               <motion.p
                 key={scores[p]}
@@ -897,6 +897,40 @@ const todayMVP = getTodayMVP();
                   ))}
                 </div>
               )}
+              {/* 🔥 ON FIRE */}
+                {/* {winStreak >= 3 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="absolute top-2 left-1/2 -translate-x-1/2
+                              px-3 py-0.5 rounded-full
+                              text-[0.65rem] font-extrabold tracking-widest
+                              bg-orange-500 text-black
+                              shadow-[0_0_20px_rgba(255,120,0,0.9)]
+                              animate-pulse z-20"
+                  >
+                    ON FIRE
+                  </motion.div>
+                )} */}
+
+                {/* 😵 TILTED */}
+                {/* {loseStreak >= 3 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="absolute top-2 left-1/2 -translate-x-1/2
+                              px-3 py-0.5 rounded-full
+                              text-[0.65rem] font-extrabold tracking-widest
+                              bg-blue-500 text-white
+                              shadow-[0_0_20px_rgba(80,150,255,0.9)]
+                              animate-pulse z-20"
+                  >
+                    TILTED
+                  </motion.div>
+                )} */}
+
 
             </div>
           </div>
