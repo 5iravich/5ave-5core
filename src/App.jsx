@@ -642,6 +642,13 @@ const getTodayMVP = () => {
 
 const todayMVP = getTodayMVP();
 
+const carMap = {
+  Meen: carRed,
+  Cho: carGreen,
+  Faii: carBlue,
+};
+
+
   return (
     <>
     {isLoading && (
@@ -1089,14 +1096,14 @@ const todayMVP = getTodayMVP();
       </div>
         
         {activePlayer && (
-  <motion.div
-    className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center"
-    initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setActivePlayer(null)}   // 👈 คลิกที่อื่น = ปิด
-  >
-    <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 w-[360px] text-center shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-      {/*กัน event ไม่ให้เด้งไป overlay */}
-      <a onClick={() => setActivePlayer(null)} className="absolute top-3 right-5 text-gray-400 hover:text-white">✕</a>
-      <h2 className="text-xl font-bold mb-4">{activePlayer} – สถิติ</h2>
+          <motion.div
+            className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setActivePlayer(null)}   // 👈 คลิกที่อื่น = ปิด
+          >
+          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 w-[460px] text-center shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+            {/*กัน event ไม่ให้เด้งไป overlay */}
+            <a onClick={() => setActivePlayer(null)} className="absolute top-3 right-5 text-gray-400 hover:text-white">✕</a>
+            <h2 className="text-xl font-bold mb-4">{activePlayer} – สถิติ</h2>
 
       {(() => {
         const s = getPlayerStats(activePlayer);
@@ -1122,14 +1129,30 @@ const todayMVP = getTodayMVP();
                 )}
               </span>
             )}
+
             {activePlayer === getLeader() && (
             <div className="px-2 text-sm text-blue-400 font-semibold">
               🥈 นำอันดับ 2 อยู่ {getLeadOverSecond(activePlayer)} แต้ม
             </div>
           )}
+          
           </div>
+
+          
           <div className="flex justify-center gap-3 p-2 my-3 border-2 border-blue-900/30 rounded-2xl hover:scale-101 transition-all duration-300">
-            <div className="">
+             {/* 🚗 PLAYER CAR */}
+             <div className="-ml-8">
+              <motion.img
+              src={carMap[activePlayer]}
+              alt="car"
+              initial={{ y: 100, opacity: 0, rotate: 90 }}
+              animate={{ y: 30, opacity: 1, rotate: 90 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="h-28 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]"
+            />
+             </div>
+            
+            <div className="-ml-8">
               <div className="group block my-2 bg-yellow-500/30 rounded-xl p-2 hover:scale-105 transition-all duration-300">
                 <div className="text-2xl font-bold">🥇 {s.first}</div>
               </div>
@@ -1166,27 +1189,27 @@ const todayMVP = getTodayMVP();
               </div>
             </div>
           </div>
-  {/* Progress เทียบผู้นำ */}
-  <div className="mt-4">
-    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-      <motion.div
-        className="h-full bg-gradient-to-r from-green-400 to-emerald-500"
-        initial={{ width: 0 }}
-        animate={{
-          width: `${
-            (scores[activePlayer] / Math.max(scores[getLeader()], 1)) * 100
-          }%`,
-        }}
-        transition={{ duration: 0.6 }}
-      />
-    </div>
-    <div className="flex justify-between text-xs text-gray-400 mt-1">
-      <span>คะแนน</span>
-      <span>
-        {scores[activePlayer]} / {scores[getLeader()]}
-      </span>
-    </div>
-  </div>
+            {/* Progress เทียบผู้นำ */}
+            <div className="mt-4">
+              <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-green-400 to-emerald-500"
+                  initial={{ width: 0 }}
+                  animate={{
+                    width: `${
+                      (scores[activePlayer] / Math.max(scores[getLeader()], 1)) * 100
+                    }%`,
+                  }}
+                  transition={{ duration: 0.6 }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>คะแนน</span>
+                <span>
+                  {scores[activePlayer]} / {scores[getLeader()]}
+                </span>
+              </div>
+            </div>
 
           </>
         );
