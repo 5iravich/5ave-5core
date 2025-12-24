@@ -90,9 +90,9 @@ export default function App() {
 };
 
  const OPlaceColorMap = {
-  Meen: "bg-red-500/10",
-  Cho: "bg-green-500/10",
-  Faii: "bg-blue-500/10",
+  Meen: "bg-red-500/20",
+  Cho: "bg-green-500/20",
+  Faii: "bg-blue-500/20",
 };
 
  const ScoreMap = {
@@ -1267,7 +1267,7 @@ const getNemesis = (player) => {
                     LATEST
                   </motion.div>
                 )}
-                <div className={`absolute top-0 right-5 w-15 h-15 ${OPlaceColorMap[r.first] ?? "bg-gray-500/10" } rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500`}></div>
+                <div className={`absolute top-0 right-5 w-15 h-15 ${OPlaceColorMap[r.first] ?? "bg-gray-500/10" } rounded-xl -mr-12 -mb-12 group-hover:scale-150 transition-transform duration-500 -z-30`}></div>
                 <img className={`absolute opacity-20 -z-100 scale-300 group-hover:scale-350 transition-transform duration-500 `} src={pattern} alt="pattern" />
               <div className="text-gray-300 text-xs mb-2">{r.time}</div>
               <div className="flex justify-center">
@@ -1284,8 +1284,8 @@ const getNemesis = (player) => {
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-2 text-xs font-extrabold text-center
-                            bg-blue-500/30 text-white rounded-full"
+                  className={`mt-2 text-xs font-extrabold text-center
+                            ${OPlaceColorMap[r.first]} text-white rounded-full`}
                 >
                   🌠 {r.kill.killer} ได้สกัดดาวรุ่ง {r.kill.victim}
                 </motion.div>
