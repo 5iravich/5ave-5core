@@ -738,6 +738,25 @@ const [killMatrix, setKillMatrix] = useState(() => {
   );
 });
 
+const buildKillMatrixFromHistory = (history, players) => {
+  const matrix = {};
+
+  players.forEach((p) => {
+    matrix[p] = {};
+    players.forEach((op) => {
+      if (op !== p) matrix[p][op] = 0;
+    });
+  });
+
+  history.forEach((h) => {
+    if (h.kill?.killer && h.kill?.victim) {
+      matrix[h.kill.killer][h.kill.victim] += 1;
+    }
+  });
+
+  return matrix;
+};
+
 
 useEffect(() => {
   localStorage.setItem("killMatrix", JSON.stringify(killMatrix));
@@ -769,24 +788,7 @@ const getNemesis = (player) => {
   return max >= 3 ? { nemesis, count: max } : null;
 };
 
-const buildKillMatrixFromHistory = (history, players) => {
-  const matrix = {};
 
-  players.forEach((p) => {
-    matrix[p] = {};
-    players.forEach((op) => {
-      if (op !== p) matrix[p][op] = 0;
-    });
-  });
-
-  history.forEach((h) => {
-    if (h.kill?.killer && h.kill?.victim) {
-      matrix[h.kill.killer][h.kill.victim] += 1;
-    }
-  });
-
-  return matrix;
-};
 
   return (
     <>
